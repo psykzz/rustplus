@@ -1,5 +1,6 @@
-import requests
 import json
+
+import requests
 
 item_ids = {
     "-2139580305": "Auto Turret",
