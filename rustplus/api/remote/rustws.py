@@ -5,15 +5,16 @@ import time
 from datetime import datetime
 from threading import Thread
 from typing import Optional
+
 import websocket
 
+from ...conversation import Conversation
+from ...exceptions import ClientNotConnectedError
+from ...utils import ServerID
+from ..structures import RustChatMessage
 from .camera.structures import RayPacket
 from .events import EventLoopManager
 from .rustplus_proto import AppMessage, AppRequest
-from ..structures import RustChatMessage
-from ...exceptions import ClientNotConnectedError
-from ...conversation import Conversation
-from ...utils import ServerID
 
 CONNECTED = 1
 PENDING_CONNECTION = 2
@@ -32,7 +33,6 @@ class RustWebsocket(websocket.WebSocket):
         on_failure,
         delay,
     ):
-
         self.server_id = server_id
         self.thread: Thread = None
         self.connection_status = CLOSED
@@ -51,15 +51,12 @@ class RustWebsocket(websocket.WebSocket):
     async def connect(
         self, retries=float("inf"), ignore_open_value: bool = False
     ) -> None:
-
         if (
             not self.connection_status == CONNECTED or ignore_open_value
         ) and not self.remote.is_pending():
-
             attempts = 0
 
             while True:
-
                 if attempts >= retries:
                     raise ConnectionAbortedError("Reached Retry Limit")
 
@@ -84,7 +81,6 @@ class RustWebsocket(websocket.WebSocket):
                     self.connected_time = time.time()
                     break
                 except Exception as exception:
-
                     print_error = True
 
                     if not isinstance(exception, KeyboardInterrupt):
@@ -119,7 +115,6 @@ class RustWebsocket(websocket.WebSocket):
             self.thread.start()
 
     def close(self) -> None:
-
         self.connection_status = CLOSING
         self.shutdown()
         # super().close()
@@ -145,7 +140,6 @@ class RustWebsocket(websocket.WebSocket):
             return await self.remote.send_message(message)
 
     def run(self) -> None:
-
         while self.connection_status == CONNECTED:
             try:
                 data = self.recv()
@@ -181,7 +175,6 @@ class RustWebsocket(websocket.WebSocket):
                 self.logger.error(e)
 
     def handle_message(self, app_message: AppMessage) -> None:
-
         if app_message.response.seq in self.remote.ignored_responses:
             self.remote.ignored_responses.remove(app_message.response.seq)
             return
