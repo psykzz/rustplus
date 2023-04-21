@@ -21,7 +21,7 @@ jobs:
       - name: Remove unused imports with autoflake
         run: |
           pip install autoflake
-          autoflake --in-place --remove-all-unused-imports --remove-unused-variables --recursive .
+          autoflake --in-place --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports --recursive .
       - name: Commit changes
         uses: EndBug/add-and-commit@v4
         with:
